@@ -477,6 +477,8 @@ class ModifiedPolynomialThresholdScheduler(BaseCompressionScheduler):
         self.do_regularization_factor_warmup = params.get('do_regularization_factor_warmup', True)
 
         self.in_warmup = False
+        self._update_per_optimizer_step = params.get('update_per_optimizer_step', False)
+        self._steps_per_epoch = params.get('steps_per_epoch', None)
         self.current_scale = self.warmup_start_scale
         self.cached_importance_threshold = self.current_importance_threshold
 
@@ -489,8 +491,6 @@ class ModifiedPolynomialThresholdScheduler(BaseCompressionScheduler):
             )
 
         self._steps_in_current_epoch = 0
-        self._update_per_optimizer_step = params.get('update_per_optimizer_step', False)
-        self._steps_per_epoch = params.get('steps_per_epoch', None)
         self._should_skip = False
 
     @property
@@ -502,7 +502,9 @@ class ModifiedPolynomialThresholdScheduler(BaseCompressionScheduler):
     
     @property
     def current_importance_threshold(self):
-        if self.in_warmup and (not self.do_threshold_warmup):
+        if self.current_step < self.warmup_start_epoch * self._steps_per_epoch:
+            return -10
+        elif self.in_warmup and (not self.do_threshold_warmup):
             return self.importance_threshold * self.warmup_end_scale
         else:
             return self.importance_threshold * self.current_scale

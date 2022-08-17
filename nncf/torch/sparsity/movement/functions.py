@@ -15,15 +15,18 @@ import torch
 
 from nncf.torch.dynamic_graph.patch_pytorch import register_operator
 from nncf.torch.functions import STThreshold
+from distutils.util import strtobool
+
+import os
 
 @register_operator()
-def binary_mask_by_threshold(importance, threshold=0.5, sigmoid=True, max_percentile=0.98):
+def binary_mask_by_threshold(importance, threshold=0.5, sigmoid=strtobool(os.environ.get('NNCF_THRESHOLD_SIGMOID', 'True')), max_percentile=0.98):
     with torch.no_grad():
-        if sigmoid is True:
+        if sigmoid:
             max_threshold = torch.quantile(torch.sigmoid(importance), q=max_percentile).item()
         else:
             max_threshold = torch.quantile(importance, q=max_percentile).item()
     
-    if sigmoid is True:
+    if sigmoid:
         return STThreshold.apply(torch.sigmoid(importance), min(threshold, max_threshold))
     return STThreshold.apply(importance, min(threshold, max_threshold))

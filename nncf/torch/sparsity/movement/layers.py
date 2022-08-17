@@ -66,7 +66,7 @@ class MovementSparsifier(nn.Module):
         self.weight_ctx = BinaryMask(weight_shape)
         self._weight_importance_shape, self._bool_expand_importance = self._get_importance_shape(weight_shape)
         self._weight_importance = CompressionParameter(
-                                torch.rand(self._weight_importance_shape) if DEBUG is True else torch.zeros(self._weight_importance_shape),
+                                torch.rand(self._weight_importance_shape) if DEBUG is True else torch.ones(self._weight_importance_shape),
                                 requires_grad=not self.frozen,
                                 compression_lr_multiplier=compression_lr_multiplier)
         self.weight_ctx.binary_mask = binary_mask_by_threshold(
@@ -79,7 +79,7 @@ class MovementSparsifier(nn.Module):
             self.bias_ctx = BinaryMask(bias_shape)
             self._bias_importance_shape = self._weight_importance_shape[0]
             self._bias_importance = CompressionParameter(
-                                torch.rand(self._bias_importance_shape) if DEBUG is True else torch.zeros(self._bias_importance_shape),
+                                torch.rand(self._bias_importance_shape) if DEBUG is True else torch.ones(self._bias_importance_shape),
                                 requires_grad=not self.frozen,
                                 compression_lr_multiplier=compression_lr_multiplier)
             self.bias_ctx.binary_mask = binary_mask_by_threshold(
