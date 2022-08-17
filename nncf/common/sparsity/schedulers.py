@@ -503,7 +503,7 @@ class ModifiedPolynomialThresholdScheduler(BaseCompressionScheduler):
     @property
     def current_importance_threshold(self):
         if self.current_step < self.warmup_start_epoch * self._steps_per_epoch:
-            return -10
+            return -1e10
         elif self.in_warmup and (not self.do_threshold_warmup):
             return self.importance_threshold * self.warmup_end_scale
         else:
