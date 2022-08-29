@@ -12,6 +12,8 @@
 """
 
 from typing import Optional, Dict, Any
+import os
+import math
 
 from nncf.common.utils.logger import logger
 from nncf.common.utils.registry import Registry
@@ -437,6 +439,7 @@ class PolynomialThresholdScheduler(BaseCompressionScheduler):
 
 
 
+import os
 
 @SPARSITY_SCHEDULERS.register('modified_threshold_polynomial_decay')
 class ModifiedPolynomialThresholdScheduler(BaseCompressionScheduler):
@@ -480,7 +483,7 @@ class ModifiedPolynomialThresholdScheduler(BaseCompressionScheduler):
         self._update_per_optimizer_step = params.get('update_per_optimizer_step', False)
         self._steps_per_epoch = params.get('steps_per_epoch', None)
         self.current_scale = self.warmup_start_scale
-        self.cached_importance_threshold = self.current_importance_threshold
+        self.cached_importance_threshold = None
 
         self.schedule = PolynomialDecaySchedule(
             self.warmup_start_scale, 
@@ -503,7 +506,7 @@ class ModifiedPolynomialThresholdScheduler(BaseCompressionScheduler):
     @property
     def current_importance_threshold(self):
         if self.current_step < self.warmup_start_epoch * self._steps_per_epoch:
-            return -1e10
+            return 0.0 if int(os.environ.get('YUJIE_SIGMOID_THRESHOLD', '1')) else -math.inf
         elif self.in_warmup and (not self.do_threshold_warmup):
             return self.importance_threshold * self.warmup_end_scale
         else:

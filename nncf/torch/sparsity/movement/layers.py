@@ -11,6 +11,8 @@
  limitations under the License.
 """
 from typing import List
+import os
+import math
 
 import torch
 
@@ -59,14 +61,14 @@ class MovementSparsifier(nn.Module):
         self.frozen = frozen
         self.eps = eps
         self.lmbd = 0.5 # module_level_loss_weightage
-        self.masking_threshold = 0.0
+        self.masking_threshold = 0.0 if int(os.environ.get('YUJIE_SIGMOID_THRESHOLD', '1')) else -math.inf
         self.sparse_cfg = sparse_cfg
         
         weight_shape = target_module_node.layer_attributes.get_weight_shape()
         self.weight_ctx = BinaryMask(weight_shape)
         self._weight_importance_shape, self._bool_expand_importance = self._get_importance_shape(weight_shape)
         self._weight_importance = CompressionParameter(
-                                torch.rand(self._weight_importance_shape) if DEBUG is True else torch.ones(self._weight_importance_shape),
+                                torch.rand(self._weight_importance_shape) if DEBUG is True else torch.zeros(self._weight_importance_shape),
                                 requires_grad=not self.frozen,
                                 compression_lr_multiplier=compression_lr_multiplier)
         self.weight_ctx.binary_mask = binary_mask_by_threshold(

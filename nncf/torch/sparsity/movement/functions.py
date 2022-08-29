@@ -20,7 +20,7 @@ from distutils.util import strtobool
 import os
 
 @register_operator()
-def binary_mask_by_threshold(importance, threshold=0.5, sigmoid=strtobool(os.environ.get('NNCF_THRESHOLD_SIGMOID', 'True')), max_percentile=0.98):
+def binary_mask_by_threshold(importance, threshold=0.5, sigmoid=int(os.environ.get('YUJIE_SIGMOID_THRESHOLD', '1')), max_percentile=0.98):
     with torch.no_grad():
         if sigmoid:
             max_threshold = torch.quantile(torch.sigmoid(importance), q=max_percentile).item()
