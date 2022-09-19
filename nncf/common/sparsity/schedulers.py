@@ -495,6 +495,7 @@ class ModifiedPolynomialThresholdScheduler(BaseCompressionScheduler):
         self.warmup_start_epoch = params.get('warmup_start_epoch', 0.0)
         self.warmup_end_epoch = params.get('warmup_end_epoch', 0.0)
 
+        self.importance_threshold_warmup_start = params.get('importance_threshold_warmup_start', -10.0)
         self.importance_threshold = params.get('importance_threshold', 0.5)
         self.importance_regularization_factor = params.get('importance_regularization_factor', 1.0)
         self.do_threshold_warmup = params.get('do_threshold_warmup', True)
@@ -529,9 +530,9 @@ class ModifiedPolynomialThresholdScheduler(BaseCompressionScheduler):
         if self.current_step < self.warmup_start_epoch * self._steps_per_epoch:
             return 0.0 if int(os.environ.get('YUJIE_SIGMOID_THRESHOLD', '1')) else -math.inf
         elif self.in_warmup and (not self.do_threshold_warmup):
-            return self.importance_threshold * self.warmup_end_scale
+            return (self.importance_threshold - self.importance_threshold_warmup_start) * self.warmup_end_scale + self.importance_threshold_warmup_start
         else:
-            return self.importance_threshold * self.current_scale
+            return (self.importance_threshold - self.importance_threshold_warmup_start) * self.current_scale + self.importance_threshold_warmup_start
 
     def _disable_importance_grad(self):
         for m in self._controller.sparsified_module_info:
