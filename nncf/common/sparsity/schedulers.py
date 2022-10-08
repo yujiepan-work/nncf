@@ -494,6 +494,7 @@ class ModifiedPolynomialThresholdScheduler(BaseCompressionScheduler):
         self.warmup_end_scale = params.get('warmup_end_scale', 0.1)
         self.warmup_start_epoch = params.get('warmup_start_epoch', 0.0)
         self.warmup_end_epoch = params.get('warmup_end_epoch', 0.0)
+        self.fill_stage_epoch = params.get('fill_stage_epoch', self.warmup_end_epoch) # TODO: api name
 
         self.importance_threshold_warmup_start = params.get('importance_threshold_warmup_start', -10.0)
         self.importance_threshold = params.get('importance_threshold', 0.5)
