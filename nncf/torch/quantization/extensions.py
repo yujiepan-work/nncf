@@ -51,6 +51,10 @@ class QuantizedFunctionsCPULoader(ExtensionLoader):
 
     @classmethod
     def load(cls):
+        import os
+        if os.environ.get('FORCE_FALLBACK_CPU_QUANTIZATION', 'false').lower() == 'true':
+            nncf_logger.warning('Force using the fallback CPU quantization function.')
+            return ReferenceQuantizedFunctions
         try:
             retval = torch.utils.cpp_extension.load(cls.name(),
                           CPU_EXT_SRC_LIST,
