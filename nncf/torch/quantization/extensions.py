@@ -78,6 +78,10 @@ class QuantizedFunctionsCUDALoader(ExtensionLoader):
 
     @classmethod
     def load(cls):
+        import os
+        if os.environ.get('FORCE_FALLBACK_CUDA_QUANTIZATION', 'false').lower() == 'true':
+            nncf_logger.warning('Force using the fallback CUDA quantization function.')
+            return ReferenceQuantizedFunctions
         try:
             return torch.utils.cpp_extension.load(cls.name(),
                         CUDA_EXT_SRC_LIST,
